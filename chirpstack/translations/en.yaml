@@ -1,0 +1,125 @@
+configuration:
+  mqtt:
+    name: MQTT Settings
+    description: >-
+      MQTT broker connection settings. These are shared by ChirpStack,
+      the Gateway Bridge, and optionally Concentratord.
+    fields:
+      server:
+        name: MQTT Server
+        description: "MQTT broker URL (e.g. tcp://core-mosquitto:1883)"
+      username:
+        name: MQTT Username
+        description: "Username for MQTT authentication"
+      password:
+        name: MQTT Password
+        description: "Password for MQTT authentication"
+
+  chirpstack:
+    name: ChirpStack Settings
+    description: Core ChirpStack network server configuration.
+    fields:
+      log_level:
+        name: Log Level
+        description: >-
+          ChirpStack log verbosity. Use 'info' for normal operation,
+          'debug' for troubleshooting.
+      api_bind:
+        name: API Bind Address
+        description: >-
+          IP:port for the ChirpStack web interface and API.
+          Use 0.0.0.0:8080 to expose on all interfaces.
+      api_secret:
+        name: API Secret
+        description: >-
+          Secret key for API authentication.
+          Generate with: openssl rand -base64 32
+      network_id:
+        name: Network ID (NetID)
+        description: >-
+          LoRaWAN NetID (3 bytes hex). Use 000000 for
+          private/experimental networks.
+      database_dsn:
+        name: Database DSN
+        description: >-
+          SQLite connection string. Default is recommended
+          unless you know what you are doing.
+      region:
+        name: LoRaWAN Region
+        description: >-
+          Frequency plan. Must match your gateway hardware
+          and local regulations.
+      advanced_config:
+        name: Advanced ChirpStack Configuration
+        description: >-
+          Additional TOML configuration sections to merge into
+          chirpstack.toml. One section per line.
+
+  gateway_bridge:
+    name: Gateway Bridge Settings
+    description: >-
+      ChirpStack Gateway Bridge configuration. The bridge translates
+      between gateway protocols and ChirpStack's MQTT backend.
+    fields:
+      log_level:
+        name: Log Level
+        description: "Gateway Bridge log verbosity."
+      basic_station:
+        name: Basic Station
+        description: >-
+          LoRa Basic Station protocol. Used by many modern gateways
+          (e.g. RAK72xx, Mikrotik, Kerlink).
+        fields:
+          enabled:
+            name: Enable Basic Station
+            description: >-
+              Enable the Basic Station backend for gateways
+              using this protocol.
+          bind:
+            name: Bind Address
+            description: "IP:port for Basic Station WebSocket connections."
+      packet_forwarder:
+        name: Semtech UDP Packet Forwarder
+        description: >-
+          Legacy Semtech UDP packet forwarder protocol.
+          Used by older gateways and the Semtech reference design.
+        fields:
+          enabled:
+            name: Enable Packet Forwarder
+            description: "Enable the Semtech UDP packet forwarder backend."
+          bind:
+            name: Bind Address
+            description: "IP:port for UDP packet forwarder connections."
+      advanced_config:
+        name: Advanced Gateway Bridge Configuration
+        description: >-
+          Additional TOML configuration sections to merge into
+          gateway-bridge.toml. One section per line.
+
+  concentratord:
+    name: Concentratord Settings
+    description: >-
+      ChirpStack Concentratord daemon. Only for gateways with a
+      concentrator board (SX1301/SX1302/SX1280) connected directly
+      via SPI/USB. Disable if using an external gateway with its
+      own packet forwarder. Only available on arm64/armv7hf.
+    fields:
+      enabled:
+        name: Enable Concentratord
+        description: >-
+          Enable the concentrator daemon. Disable if your gateway
+          runs its own packet forwarder (most commercial gateways).
+      model:
+        name: Hardware Model
+        description: >-
+          Select your gateway/shield model. This automatically
+          picks the correct concentratord binary (SX1301, SX1302, or 2G4).
+      model_flags:
+        name: Hardware Flags
+        description: >-
+          Comma-separated flags for your hardware.
+          Common flags: GNSS (GPS), USB (USB instead of SPI),
+          AP1/AP2 (Multitech slot). Leave empty if not applicable.
+      antenna_gain:
+        name: Antenna Gain (dB)
+        description: "Antenna gain in dB. Set to 0 if unknown."

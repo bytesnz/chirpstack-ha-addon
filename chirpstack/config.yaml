@@ -1,6 +1,6 @@
 name: "ChirpStack 4.0"
-description: "ChirpStack 4.15.0 LoRaWAN Network Server with SQLite and Gateway Bridge"
-version: "4.15.0"
+description: "ChirpStack LoRaWAN Network Server with SQLite, Gateway Bridge, and optional Concentratord"
+version: "4.16.10"
 slug: "chirpstack"
 init: false
 arch:
@@ -22,6 +22,10 @@ devices:
   - /dev/ttyACM0
   - /dev/ttyAMA0
   - /dev/serial/by-id
+  - /dev/gpiochip0
+  - /dev/gpiochip1
+  - /dev/spidev0.0
+  - /dev/i2c-1
 ports:
   8080/tcp: 8080
   1700/udp: 1700
@@ -34,35 +38,20 @@ map:
   - share:rw
   - config:rw
 options:
-  # =============================================================================
-  # MQTT Settings (shared by ChirpStack and Gateway Bridge)
-  # =============================================================================
   mqtt:
     server: "tcp://core-mosquitto:1883"
     username: "chirpstack"
     password: ""
-  
-  # =============================================================================
-  # ChirpStack Configuration
-  # =============================================================================
+
   chirpstack:
     log_level: info
     api_bind: "0.0.0.0:8080"
     api_secret: "you-must-replace-this"
     network_id: "000000"
     database_dsn: "sqlite:///config/chirpstack/chirpstack.db?mode=rwc"
-    integrations_enabled: "mqtt"
-    regions: |
-      [[regions]]
-      name="eu868"
-      common_name="EU868"
-    advanced_config: |
-      # Additional ChirpStack configuration
-      # Any TOML sections you want to add or override
-  
-  # =============================================================================
-  # Gateway Bridge Configuration  
-  # =============================================================================
+    region: eu868
+    advanced_config: ""
+
   gateway_bridge:
     log_level: info
     basic_station:
@@ -71,28 +60,29 @@ options:
     packet_forwarder:
       enabled: true
       bind: "0.0.0.0:1700"
-    advanced_config: |
-      # Additional Gateway Bridge configuration
-      # Any TOML sections you want to add or override
+    advanced_config: ""
+
+  concentratord:
+    enabled: false
+    model: rak_2287
+    model_flags: ""
+    antenna_gain: "0"
+
 schema:
-  # MQTT Settings Schema
   mqtt:
     server: str
     username: str
     password: password
-  
-  # ChirpStack Configuration Schema
+
   chirpstack:
     log_level: list(trace|debug|info|warn|error|fatal)?
     api_bind: str?
     api_secret: str?
     network_id: str?
     database_dsn: str?
-    integrations_enabled: str?
-    regions: str?
+    region: list(eu868|us915|us915_2|cn470|cn779|eu433|as923|as923_2|as923_3|as923_4|au915|au915_2|in865|kr920|ru864)
     advanced_config: str?
-  
-  # Gateway Bridge Configuration Schema
+
   gateway_bridge:
     log_level: list(trace|debug|info|warn|error|fatal)?
     basic_station:
@@ -102,3 +92,9 @@ schema:
       enabled: bool?
       bind: str?
     advanced_config: str?
+
+  concentratord:
+    enabled: bool?
+    model: list(imst_ic880a|kerlink_ifemtocell|multitech_mtcap_lora_868|multitech_mtcap_lora_915|multitech_mtac_lora_h_868|multitech_mtac_lora_h_915|pi_supply_lora_gateway_hat|rak_2245|rak_2246|rak_2247|risinghf_rhf0m301|sandbox_lorago_port|wifx_lorix_one|dragino_pg1302|elecrow_lr1302|miromico_gwc_02_lw_868|miromico_gwc_02_lw_915|mtcap3_003e00|mtcap3_003u00|multitech_mtac_003e00|multitech_mtac_003u00|rak_2287|rak_5146|seeed_wm1302|semtech_sx1302c470gw1|semtech_sx1302c868gw1|semtech_sx1302c915gw1|semtech_sx1302css868gw1|semtech_sx1302css915gw1|semtech_sx1302css923gw1|waveshare_sx1302_lorawan_gateway_hat|multitech_mtac_lora_2g4|rak_5148|semtech_sx1280z3dsfgw1)?
+    model_flags: str?
+    antenna_gain: str?
